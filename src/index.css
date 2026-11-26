@@ -1,0 +1,309 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: "Rubik", system-ui, sans-serif;
+  --font-sans: "Nunito", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    background-color: #a5e3ff;
+    color: #0f172a;
+    font-family: var(--font-sans);
+    letter-spacing: 0.005em;
+  }
+
+  html.dark,
+  html.dark body,
+  html.dark #root {
+    background-color: #0b162c;
+    color: #f8fafc;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ============================================================================
+   CARTOON-ARCADE ISLANDS — BOLD INK OUTLINES & TACTILE 3D ARCADE BUTTONS
+   ============================================================================ */
+
+.cartoon-card {
+  border: 2.5px solid #0f172a;
+  border-radius: 1.25rem;
+  box-shadow: 0 5px 0 #0f172a;
+}
+
+html.dark .cartoon-card {
+  border-color: #334155;
+  box-shadow: 0 5px 0 #020617;
+}
+
+.cartoon-btn-green {
+  background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+  color: #052e16;
+  border: 2.5px solid #0f172a;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    0 5px 0 #0f172a;
+  transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease;
+}
+
+html.dark .cartoon-btn-green {
+  border-color: #052e16;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    0 5px 0 #020617;
+}
+
+.cartoon-btn-green:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.65),
+    0 6px 0 #0f172a;
+}
+
+.cartoon-btn-green:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 2px 0 #0f172a;
+}
+
+.cartoon-btn-amber {
+  background: linear-gradient(180deg, #fde047 0%, #f59e0b 100%);
+  color: #1c1002;
+  border: 2.5px solid #0f172a;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    0 5px 0 #0f172a;
+  transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease;
+}
+
+html.dark .cartoon-btn-amber {
+  border-color: #451a03;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    0 5px 0 #020617;
+}
+
+.cartoon-btn-amber:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.7),
+    0 6px 0 #0f172a;
+}
+
+.cartoon-btn-amber:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #0f172a;
+}
+
+.cartoon-btn-sky {
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+  color: #ffffff;
+  border: 2.5px solid #0f172a;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.42),
+    0 4px 0 #0f172a;
+  transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease;
+}
+
+html.dark .cartoon-btn-sky {
+  border-color: #0c4a6e;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    0 4px 0 #020617;
+}
+
+.cartoon-btn-sky:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.5),
+    0 5px 0 #0f172a;
+}
+
+.cartoon-btn-sky:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #0f172a;
+}
+
+.cartoon-btn-white {
+  border: 2px solid #0f172a;
+  box-shadow: 0 3px 0 #0f172a;
+  transition: transform 90ms ease, box-shadow 90ms ease, background-color 120ms ease;
+}
+
+html.dark .cartoon-btn-white {
+  border-color: #475569;
+  box-shadow: 0 3px 0 #020617;
+}
+
+.cartoon-btn-white:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #0f172a;
+}
+
+html.dark .cartoon-btn-white:hover:not(:disabled) {
+  box-shadow: 0 4px 0 #020617;
+}
+
+.cartoon-btn-white:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #0f172a;
+}
+
+/* Preserved helper classes for existing submodes */
+.arcade-btn-green {
+  border: 2px solid #0f172a;
+  box-shadow: 0 4px 0 #0f172a;
+  transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease;
+}
+.arcade-btn-green:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+.arcade-btn-green:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #0f172a;
+}
+
+.game-btn-primary {
+  background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+  color: #052e16;
+  border: 2.5px solid #0f172a;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    0 5px 0 #0f172a;
+  transition: transform 90ms ease, box-shadow 90ms ease, filter 120ms ease;
+}
+.game-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+.game-btn-primary:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #0f172a;
+}
+
+.game-btn-secondary {
+  border: 2px solid #0f172a;
+  box-shadow: 0 3px 0 #0f172a;
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+html.dark .game-btn-secondary {
+  border-color: #475569;
+  box-shadow: 0 3px 0 #020617;
+}
+.game-btn-secondary:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #0f172a;
+}
+
+/* Gentle character pedestal bob */
+@keyframes hero-bob {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-hero-bob {
+  animation: hero-bob 2.8s ease-in-out infinite;
+}
+
+/* Theme-aware scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e0f2fe;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #0b162c;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+@keyframes countdown-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes countdown-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes countdown-num-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.62);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-countdown-fade {
+  animation: countdown-fade-in 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-countdown-card {
+  animation: countdown-card-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-countdown-pop {
+  animation: countdown-num-pop 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-countdown-fade,
+  .animate-countdown-card,
+  .animate-countdown-pop,
+  .animate-hero-bob {
+    animation: none !important;
+  }
+}

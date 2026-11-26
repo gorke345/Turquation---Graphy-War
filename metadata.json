@@ -1,0 +1,6 @@
+{
+  "name": "Parabola Arena",
+  "description": "Real-time competitive multiplayer math arena for TYT & 11th Grade functions: Quiz Race, Function Battleship, and Graph Wars.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

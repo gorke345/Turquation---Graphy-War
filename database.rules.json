@@ -1,0 +1,87 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && (auth.uid == $uid || (newData.hasChild('lastSettledMatchId') && root.child('matches_settled').child(newData.child('lastSettledMatchId').val()).child('settledBy').val() == auth.uid))",
+        ".validate": "newData.hasChildren(['uid', 'username', 'elo', 'levelTrack']) && newData.child('uid').val() == $uid && newData.child('username').isString() && newData.child('username').val().length >= 2 && newData.child('username').val().length <= 32 && newData.child('elo').isNumber() && newData.child('elo').val() >= 100 && newData.child('elo').val() <= 5000 && (newData.child('levelTrack').val() == 'TYT' || newData.child('levelTrack').val() == '11_AYT')"
+      }
+    },
+
+    "leaderboard": {
+      ".read": true,
+      ".indexOn": ["elo"],
+      "$uid": {
+        ".write": "auth != null && (auth.uid == $uid || (newData.hasChild('lastSettledMatchId') && root.child('matches_settled').child(newData.child('lastSettledMatchId').val()).child('settledBy').val() == auth.uid))",
+        ".validate": "newData.hasChildren(['uid', 'username', 'elo', 'levelTrack']) && newData.child('uid').val() == $uid && newData.child('elo').isNumber() && newData.child('elo').val() >= 100 && newData.child('elo').val() <= 5000"
+      }
+    },
+
+    "user_matches": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        "$matchId": {
+          ".write": "auth != null && !data.exists() && (auth.uid == $uid || root.child('matches_settled').child($matchId).child('settledBy').val() == auth.uid)",
+          ".validate": "newData.hasChildren(['matchId', 'ownerUid', 'mode', 'difficulty', 'isRanked', 'rank', 'totalPlayers', 'eloBefore', 'eloAfter', 'eloDelta', 'playedAtMs']) && newData.child('ownerUid').val() == $uid && newData.child('eloDelta').val() >= -120 && newData.child('eloDelta').val() <= 120"
+        }
+      }
+    },
+
+    "matches_settled": {
+      "$matchId": {
+        ".read": true,
+        ".write": "auth != null && !data.exists() && newData.child('settledBy').val() == auth.uid",
+        ".validate": "newData.hasChildren(['matchId', 'settledBy', 'settledAt', 'mode', 'isRanked']) && newData.child('matchId').val() == $matchId"
+      }
+    },
+
+    "ephemeral_guests": {
+      ".read": true,
+      "$sessionId": {
+        ".write": "!newData.exists() || (newData.hasChildren(['nickname', 'connectedAt']) && newData.child('nickname').isString() && newData.child('nickname').val().length >= 2 && newData.child('nickname').val().length <= 24)"
+      }
+    },
+
+    "presence": {
+      ".read": true,
+      "$sessionId": {
+        ".write": "!newData.exists() || (newData.hasChildren(['id', 'username', 'isGuest', 'connectedAt']) && newData.child('username').isString() && newData.child('username').val().length <= 32)"
+      }
+    },
+
+    "matchmaking": {
+      ".read": true,
+      "$bucketKey": {
+        "$sessionId": {
+          ".write": "!newData.exists() || (newData.hasChildren(['id', 'username', 'isGuest', 'elo', 'mode', 'difficulty', 'isRanked', 'joinedAt']) && (newData.child('isRanked').val() == false || (auth != null && newData.child('isGuest').val() == false && newData.child('uid').val() == auth.uid)))"
+        }
+      }
+    },
+
+    "rooms": {
+      ".read": true,
+      ".indexOn": ["status"],
+      "$roomCode": {
+        ".write": "(!data.exists() && (newData.child('isRanked').val() == false || auth != null)) || (data.exists() && (!newData.exists() || (data.child('isRanked').val() == false || auth != null)))",
+        "chat": {
+          "$msgId": {
+            ".validate": "newData.hasChildren(['id', 'senderId', 'senderName', 'text', 'timestamp']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 200"
+          }
+        }
+      }
+    },
+
+    "chat_cooldowns": {
+      "$roomCode": {
+        "$playerId": {
+          ".read": true,
+          ".write": "!data.exists() || !newData.exists() || (newData.child('lastSentAt').isNumber() && (!data.child('lastSentAt').exists() || newData.child('lastSentAt').val() >= data.child('lastSentAt').val() + 4500))",
+          ".validate": "newData.hasChild('lastSentAt') && newData.child('lastSentAt').isNumber()"
+        }
+      }
+    }
+  }
+}

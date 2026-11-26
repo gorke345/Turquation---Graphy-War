@@ -1,0 +1,198 @@
+{
+  "entities": {
+    "UserPrivateProfile": {
+      "title": "UserPrivateProfile",
+      "description": "Private PII profile for a registered player (email isolated from public leaderboard).",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "minLength": 3,
+          "maxLength": 180
+        },
+        "username": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 32
+        },
+        "levelTrack": {
+          "type": "string",
+          "enum": ["TYT", "11_AYT"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "username", "levelTrack", "createdAt", "updatedAt"]
+    },
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "Public competitive Elo profile and per-mode statistics for registered players only.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "username": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 32
+        },
+        "elo": {
+          "type": "integer"
+        },
+        "levelTrack": {
+          "type": "string",
+          "enum": ["TYT", "11_AYT"]
+        },
+        "matchesPlayed": {
+          "type": "integer"
+        },
+        "wins": {
+          "type": "integer"
+        },
+        "quizPlayed": {
+          "type": "integer"
+        },
+        "quizWins": {
+          "type": "integer"
+        },
+        "battleshipPlayed": {
+          "type": "integer"
+        },
+        "battleshipWins": {
+          "type": "integer"
+        },
+        "graphWarsPlayed": {
+          "type": "integer"
+        },
+        "graphWarsWins": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "uid",
+        "username",
+        "elo",
+        "levelTrack",
+        "matchesPlayed",
+        "wins",
+        "quizPlayed",
+        "quizWins",
+        "battleshipPlayed",
+        "battleshipWins",
+        "graphWarsPlayed",
+        "graphWarsWins",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "MatchHistoryRecord": {
+      "title": "MatchHistoryRecord",
+      "description": "Completed match summary persisted for a registered player.",
+      "type": "object",
+      "properties": {
+        "matchId": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["quiz_race", "battleship", "graph_wars"]
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["apprentice", "explorer", "strategist", "master"]
+        },
+        "isRanked": {
+          "type": "boolean"
+        },
+        "rank": {
+          "type": "integer"
+        },
+        "totalPlayers": {
+          "type": "integer"
+        },
+        "eloBefore": {
+          "type": "integer"
+        },
+        "eloAfter": {
+          "type": "integer"
+        },
+        "eloDelta": {
+          "type": "integer"
+        },
+        "usedTytCards": {
+          "type": "boolean"
+        },
+        "score": {
+          "type": "integer"
+        },
+        "playedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "matchId",
+        "ownerUid",
+        "mode",
+        "difficulty",
+        "isRanked",
+        "rank",
+        "totalPlayers",
+        "eloBefore",
+        "eloAfter",
+        "eloDelta",
+        "usedTytCards",
+        "score",
+        "playedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserPrivateProfile" },
+      "description": "Private PII records for registered players only."
+    },
+    "/leaderboard/{userId}": {
+      "schema": { "$ref": "#/entities/LeaderboardEntry" },
+      "description": "Global Elo leaderboard entries for registered players only (no PII)."
+    },
+    "/matches/{matchId}": {
+      "schema": { "$ref": "#/entities/MatchHistoryRecord" },
+      "description": "Personal match history records for registered players."
+    }
+  }
+}

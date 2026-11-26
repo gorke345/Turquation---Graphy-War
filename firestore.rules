@@ -1,0 +1,169 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1: Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Pillar 3: Reusable Hardened Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isRegisteredUser() {
+      return isSignedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    function isOwner(userId) {
+      return isRegisteredUser() && request.auth.uid == userId;
+    }
+
+    // Pillar 2: Validation Blueprints
+    function isValidUserPrivate(data) {
+      return data.keys().hasAll(['uid', 'email', 'username', 'levelTrack', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'email', 'username', 'levelTrack', 'createdAt', 'updatedAt'])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 180
+        && data.username is string && data.username.size() >= 2 && data.username.size() <= 32
+        && data.levelTrack in ['TYT', '11_AYT']
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidLeaderboardEntry(data) {
+      return data.keys().hasAll([
+          'uid', 'username', 'elo', 'levelTrack', 'matchesPlayed', 'wins',
+          'quizPlayed', 'quizWins', 'battleshipPlayed', 'battleshipWins',
+          'graphWarsPlayed', 'graphWarsWins', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid', 'username', 'elo', 'levelTrack', 'matchesPlayed', 'wins',
+          'quizPlayed', 'quizWins', 'battleshipPlayed', 'battleshipWins',
+          'graphWarsPlayed', 'graphWarsWins', 'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.username is string && data.username.size() >= 2 && data.username.size() <= 32
+        && data.elo is int && data.elo >= 100 && data.elo <= 5000
+        && data.levelTrack in ['TYT', '11_AYT']
+        && data.matchesPlayed is int && data.matchesPlayed >= 0 && data.matchesPlayed <= 100000
+        && data.wins is int && data.wins >= 0 && data.wins <= data.matchesPlayed
+        && data.quizPlayed is int && data.quizPlayed >= 0 && data.quizPlayed <= 100000
+        && data.quizWins is int && data.quizWins >= 0 && data.quizWins <= data.quizPlayed
+        && data.battleshipPlayed is int && data.battleshipPlayed >= 0 && data.battleshipPlayed <= 100000
+        && data.battleshipWins is int && data.battleshipWins >= 0 && data.battleshipWins <= data.battleshipPlayed
+        && data.graphWarsPlayed is int && data.graphWarsPlayed >= 0 && data.graphWarsPlayed <= 100000
+        && data.graphWarsWins is int && data.graphWarsWins >= 0 && data.graphWarsWins <= data.graphWarsPlayed
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidMatchRecord(data) {
+      return data.keys().hasAll([
+          'matchId', 'ownerUid', 'mode', 'difficulty', 'isRanked', 'rank',
+          'totalPlayers', 'eloBefore', 'eloAfter', 'eloDelta', 'usedTytCards', 'score', 'playedAt'
+        ])
+        && data.keys().hasOnly([
+          'matchId', 'ownerUid', 'mode', 'difficulty', 'isRanked', 'rank',
+          'totalPlayers', 'eloBefore', 'eloAfter', 'eloDelta', 'usedTytCards', 'score', 'playedAt'
+        ])
+        && isValidId(data.matchId)
+        && isValidId(data.ownerUid)
+        && data.ownerUid == request.auth.uid
+        && data.mode in ['quiz_race', 'battleship', 'graph_wars']
+        && data.difficulty in ['apprentice', 'explorer', 'strategist', 'master']
+        && data.isRanked is bool
+        && data.rank is int && data.rank >= 1 && data.rank <= 100
+        && data.totalPlayers is int && data.totalPlayers >= 1 && data.totalPlayers <= 100
+        && data.eloBefore is int && data.eloBefore >= 100 && data.eloBefore <= 5000
+        && data.eloAfter is int && data.eloAfter >= 100 && data.eloAfter <= 5000
+        && data.eloDelta is int && data.eloDelta >= -200 && data.eloDelta <= 200
+        && data.usedTytCards is bool
+        && data.score is int && data.score >= 0 && data.score <= 1000000
+        && data.playedAt is timestamp;
+    }
+
+    // Pillar 6: Strictly Isolated Private PII Collection
+    match /users/{userId} {
+      allow get: if isValidId(userId) && isOwner(userId);
+      allow list: if false;
+      allow create: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserPrivate(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserPrivate(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['username', 'levelTrack', 'updatedAt']);
+      allow delete: if false;
+    }
+
+    // Global Elo Leaderboard (Registered Users Only, Zero PII)
+    match /leaderboard/{userId} {
+      allow get: if isValidId(userId) && isRegisteredUser();
+      allow list: if isRegisteredUser() && request.query.limit is int && request.query.limit <= 100;
+      allow create: if isValidId(userId)
+        && isOwner(userId)
+        && isValidLeaderboardEntry(incoming())
+        && incoming().elo == 1000
+        && incoming().matchesPlayed == 0
+        && incoming().wins == 0
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(userId)
+        && isOwner(userId)
+        && isValidLeaderboardEntry(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          // Action 1: Update profile track or display name
+          incoming().diff(existing()).affectedKeys().hasOnly(['username', 'levelTrack', 'updatedAt'])
+          ||
+          // Action 2: Record match outcome with bounded per-match Elo delta
+          (
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'elo', 'matchesPlayed', 'wins', 'quizPlayed', 'quizWins',
+              'battleshipPlayed', 'battleshipWins', 'graphWarsPlayed', 'graphWarsWins', 'updatedAt'
+            ])
+            && incoming().matchesPlayed == existing().matchesPlayed + 1
+            && incoming().elo >= existing().elo - 120
+            && incoming().elo <= existing().elo + 120
+          )
+        );
+      allow delete: if false;
+    }
+
+    // Match History Records (Owner-scoped, immutable once recorded)
+    match /matches/{matchId} {
+      allow get: if isValidId(matchId) && isRegisteredUser() && existing().ownerUid == request.auth.uid;
+      allow list: if isRegisteredUser() && resource.data.ownerUid == request.auth.uid;
+      allow create: if isValidId(matchId)
+        && isRegisteredUser()
+        && isValidMatchRecord(incoming())
+        && incoming().matchId == matchId
+        && incoming().playedAt == request.time;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
